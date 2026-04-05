@@ -1,8 +1,6 @@
 import './style.css'
 
 // ── EEG path generator ──────────────────────────────────────────────────────
-// Produces a realistic-looking EEG waveform as an SVG path string.
-// Mixes three sine frequencies to create the irregular, organic shape.
 function eegPath(yCenter, totalWidth, amplitude, freq, phase = 0) {
   const steps = 300
   let d = `M 0 ${yCenter}`
@@ -18,19 +16,19 @@ function eegPath(yCenter, totalWidth, amplitude, freq, phase = 0) {
   return d
 }
 
-// ── Build hero wave SVG (two copies side-by-side for seamless scroll) ───────
+// ── Build hero wave SVG — darker colors for light background ─────────────────
 function heroWaveSVG() {
   const W = 960
   const channels = [
-    { y: 50,  amp: 18, freq: 0.09,  phase: 0.0, color: '#818cf8', opacity: 0.55, sw: 1.5 },
-    { y: 90,  amp: 14, freq: 0.13,  phase: 1.8, color: '#a78bfa', opacity: 0.35, sw: 1.0 },
-    { y: 130, amp: 22, freq: 0.07,  phase: 3.2, color: '#c084fc', opacity: 0.25, sw: 1.0 },
-    { y: 160, amp: 12, freq: 0.17,  phase: 0.9, color: '#818cf8', opacity: 0.20, sw: 0.8 },
+    { y: 50,  amp: 18, freq: 0.09,  phase: 0.0, color: '#6d28d9', opacity: 0.45, sw: 1.5 },
+    { y: 90,  amp: 14, freq: 0.13,  phase: 1.8, color: '#7c3aed', opacity: 0.30, sw: 1.0 },
+    { y: 130, amp: 22, freq: 0.07,  phase: 3.2, color: '#4f46e5', opacity: 0.22, sw: 1.0 },
+    { y: 160, amp: 12, freq: 0.17,  phase: 0.9, color: '#6d28d9', opacity: 0.18, sw: 0.8 },
   ]
 
   const paths = channels.map(ch => {
     const left  = eegPath(ch.y, W, ch.amp, ch.freq, ch.phase)
-    const right = eegPath(ch.y, W, ch.amp, ch.freq, ch.phase) // same → seamless
+    const right = eegPath(ch.y, W, ch.amp, ch.freq, ch.phase)
     return `
       <path d="${left}"  stroke="${ch.color}" stroke-width="${ch.sw}" fill="none" opacity="${ch.opacity}"/>
       <path d="${right}" stroke="${ch.color}" stroke-width="${ch.sw}" fill="none" opacity="${ch.opacity}" transform="translate(${W},0)"/>`
@@ -88,6 +86,7 @@ function template() {
 
     <!-- ── Hero ── -->
     <section class="hero" id="top">
+      <canvas id="neuron-canvas"></canvas>
       <p class="hero-eyebrow">Introducing</p>
       <h1 class="hero-title">NeuraWave</h1>
       <p class="hero-tagline">Your mind, decoded.</p>
@@ -97,7 +96,7 @@ function template() {
       </p>
       <div class="hero-ctas ctas">
         <a href="#technology" class="btn btn-purple">Learn more</a>
-        <a href="#order"      class="btn btn-outline-white">Order now</a>
+        <a href="#order"      class="btn btn-outline-dark">Order now</a>
       </div>
       <div class="hero-wave">${heroWaveSVG()}</div>
     </section>
@@ -345,23 +344,204 @@ function template() {
   `
 }
 
-// ── Nav dark mode: switch when hero scrolls out of view ─────────────────────
-function initNav() {
-  const nav  = document.getElementById('nav')
-  const hero = document.querySelector('.hero')
+// ── Neuron canvas animation ──────────────────────────────────────────────────
+// Animated neural network: floating nodes, connecting lines, traveling pulses
+function initNeuronCanvas() {
+  const canvas = document.getElementById('neuron-canvas')
+  if (!canvas) return
+  const ctx = canvas.getContext('2d')
 
-  new IntersectionObserver(
-    ([entry]) => nav.classList.toggle('dark', !entry.isIntersecting),
-    { threshold: 0.05 }
-  ).observe(hero)
+  function resize() {
+    canvas.width  = canvas.offsetWidth
+    canvas.height = canvas.offsetHeight
+  }
+  resize()
+  window.addEventListener('resize', resize, { passive: true })
+
+  const count = Math.min(65, Math.floor((canvas.width * canvas.height) / 13000))
+  const CONN  = 155  // max connection distance
+
+  const nodes = Array.from({ length: count }, () => ({
+    x:     Math.random() * canvas.width,
+    y:     Math.random() * canvas.height,
+    vx:    (Math.random() - 0.5) * 0.22,
+    vy:    (Math.random() - 0.5) * 0.22,
+    r:     1.4 + Math.random() * 2,
+    phase: Math.random() * Math.PI * 2,
+  }))
+
+  const pulses = []
+
+  function spawnPulse() {
+    const a = Math.floor(Math.random() * nodes.length)
+    let best = -1, bestD = Infinity
+    nodes.forEach((n, i) => {
+      if (i === a) return
+      const d = Math.hypot(n.x - nodes[a].x, n.y - nodes[a].y)
+      if (d < CONN && d < bestD) { bestD = d; best = i }
+    })
+    if (best >= 0) {
+      pulses.push({ from: a, to: best, t: 0, speed: 0.011 + Math.random() * 0.009 })
+    }
+  }
+
+  let tick = 0
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    tick++
+
+    // Move nodes
+    nodes.forEach(n => {
+      n.x += n.vx; n.y += n.vy
+      n.phase += 0.007
+      if (n.x < 0 || n.x > canvas.width)  n.vx *= -1
+      if (n.y < 0 || n.y > canvas.height) n.vy *= -1
+    })
+
+    // Draw connections
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[j].x - nodes[i].x
+        const dy = nodes[j].y - nodes[i].y
+        const d  = Math.sqrt(dx * dx + dy * dy)
+        if (d < CONN) {
+          ctx.beginPath()
+          ctx.moveTo(nodes[i].x, nodes[i].y)
+          ctx.lineTo(nodes[j].x, nodes[j].y)
+          ctx.strokeStyle = `rgba(109, 40, 217, ${(1 - d / CONN) * 0.11})`
+          ctx.lineWidth = 0.65
+          ctx.stroke()
+        }
+      }
+    }
+
+    // Draw nodes
+    nodes.forEach(n => {
+      const alpha = 0.28 + 0.14 * Math.sin(n.phase)
+      const r     = n.r  * (0.88 + 0.12 * Math.sin(n.phase * 1.6))
+      ctx.beginPath()
+      ctx.arc(n.x, n.y, r, 0, Math.PI * 2)
+      ctx.fillStyle = `rgba(109, 40, 217, ${alpha})`
+      ctx.fill()
+    })
+
+    // Update & draw traveling pulses
+    for (let i = pulses.length - 1; i >= 0; i--) {
+      const p = pulses[i]
+      p.t += p.speed
+      if (p.t >= 1) { pulses.splice(i, 1); continue }
+
+      const fn = nodes[p.from], tn = nodes[p.to]
+      const x  = fn.x + (tn.x - fn.x) * p.t
+      const y  = fn.y + (tn.y - fn.y) * p.t
+      const a  = Math.sin(p.t * Math.PI)
+
+      // Soft glow ring
+      const grd = ctx.createRadialGradient(x, y, 0, x, y, 6)
+      grd.addColorStop(0, `rgba(167, 139, 250, ${a * 0.7})`)
+      grd.addColorStop(1, `rgba(167, 139, 250, 0)`)
+      ctx.beginPath()
+      ctx.arc(x, y, 6, 0, Math.PI * 2)
+      ctx.fillStyle = grd
+      ctx.fill()
+
+      // Bright core
+      ctx.beginPath()
+      ctx.arc(x, y, 2, 0, Math.PI * 2)
+      ctx.fillStyle = `rgba(192, 132, 252, ${a * 0.9})`
+      ctx.fill()
+    }
+
+    // Spawn new pulses periodically
+    if (tick % 42 === 0) spawnPulse()
+
+    requestAnimationFrame(draw)
+  }
+
+  draw()
+  // Initial burst so something is moving right away
+  for (let i = 0; i < 6; i++) setTimeout(spawnPulse, i * 280)
+}
+
+// ── Nav: go dark only when over dark sections ────────────────────────────────
+function initNav() {
+  const nav = document.getElementById('nav')
+  const darkSections = document.querySelectorAll('.spotlight, .ai-section')
+
+  darkSections.forEach(section => {
+    new IntersectionObserver(([entry]) => {
+      section.classList.toggle('is-dark-visible', entry.isIntersecting)
+      nav.classList.toggle('dark', [...darkSections].some(s => s.classList.contains('is-dark-visible')))
+    }, { threshold: 0.05 }).observe(section)
+  })
+}
+
+// ── Parallax — hero elements drift at different rates on scroll ──────────────
+function initParallax() {
+  let ticking = false
+  const heroEl = document.querySelector('.hero')
+
+  function update() {
+    const scrollY = window.scrollY
+    if (!heroEl || scrollY > heroEl.offsetHeight * 1.1) { ticking = false; return }
+
+    const title   = document.querySelector('.hero-title')
+    const tagline = document.querySelector('.hero-tagline')
+    const desc    = document.querySelector('.hero-desc')
+    const ctas    = document.querySelector('.hero-ctas')
+    const wave    = document.querySelector('.hero-wave')
+
+    if (title)   title.style.transform   = `translateY(${scrollY * 0.10}px)`
+    if (tagline) tagline.style.transform = `translateY(${scrollY * 0.07}px)`
+    if (desc)    desc.style.transform    = `translateY(${scrollY * 0.05}px)`
+    if (ctas)    ctas.style.transform    = `translateY(${scrollY * 0.04}px)`
+    if (wave)    wave.style.transform    = `translateY(${scrollY * -0.13}px)`
+
+    ticking = false
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) { requestAnimationFrame(update); ticking = true }
+  }, { passive: true })
+}
+
+// ── Word reveal — wrap text words in animated spans ──────────────────────────
+// Only applied to section-headings (plain text, no gradient children)
+function initWordReveal() {
+  document.querySelectorAll('h2.section-heading').forEach(el => {
+    Array.from(el.childNodes).forEach(child => {
+      if (child.nodeType !== Node.TEXT_NODE) return
+      const text = child.textContent
+      if (!text.trim()) return
+      const frag = document.createDocumentFragment()
+      text.split(/(\s+)/).forEach(part => {
+        if (!part.trim()) {
+          frag.appendChild(document.createTextNode(part))
+        } else {
+          const span = document.createElement('span')
+          span.className = 'word-reveal'
+          span.textContent = part
+          frag.appendChild(span)
+        }
+      })
+      el.replaceChild(frag, child)
+    })
+  })
 }
 
 // ── Scroll-reveal ────────────────────────────────────────────────────────────
 function initReveal() {
+  initWordReveal()
+
   const io = new IntersectionObserver(
     entries => entries.forEach(e => {
       if (e.isIntersecting) {
         e.target.classList.add('visible')
+        // Stagger each word-reveal span within the element
+        e.target.querySelectorAll('.word-reveal').forEach((w, i) => {
+          w.style.transitionDelay = `${i * 0.055}s`
+        })
         io.unobserve(e.target)
       }
     }),
@@ -374,3 +554,7 @@ function initReveal() {
 document.getElementById('app').innerHTML = template()
 initNav()
 initReveal()
+initNeuronCanvas()
+initParallax()
+// Trigger hero entrance animations after a short paint delay
+setTimeout(() => document.body.classList.add('loaded'), 60)
