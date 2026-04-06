@@ -331,10 +331,11 @@ h2.section-heading.reveal { opacity: 1; }
   font-size: 14px;
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.70);
+  color: #fff;
   margin-bottom: 16px;
   position: relative;
-  text-shadow: 0 0 8px #fff, 0 0 20px #fff, 0 0 40px rgba(167, 139, 250, 0.9), 0 0 70px rgba(167, 139, 250, 0.6);
+  z-index: 2;
+  text-shadow: 0 0 6px #fff, 0 0 15px #fff, 0 0 30px #a78bfa, 0 0 60px #a78bfa, 0 0 100px rgba(167, 139, 250, 0.5);
 }
 
 .hero-title {
@@ -348,33 +349,37 @@ h2.section-heading.reveal { opacity: 1; }
   -webkit-text-fill-color: transparent;
   background-clip: text;
   position: relative;
-  filter: drop-shadow(0 0 10px #fff) drop-shadow(0 0 25px #a78bfa) drop-shadow(0 0 60px #a78bfa);
+  z-index: 2;
+  filter: drop-shadow(0 0 6px #fff) drop-shadow(0 0 15px #fff) drop-shadow(0 0 30px #a78bfa) drop-shadow(0 0 70px #a78bfa);
 }
 
 .hero-tagline {
   font-size: clamp(24px, 3.5vw, 32px);
   font-weight: 300;
-  color: rgba(255, 255, 255, 0.85);
+  color: #fff;
   letter-spacing: -0.5px;
   margin-bottom: 16px;
   position: relative;
+  z-index: 2;
   will-change: transform;
-  text-shadow: 0 0 8px #fff, 0 0 20px #fff, 0 0 40px rgba(167, 139, 250, 0.9), 0 0 70px rgba(167, 139, 250, 0.6);
+  text-shadow: 0 0 6px #fff, 0 0 15px #fff, 0 0 30px #a78bfa, 0 0 60px #a78bfa, 0 0 100px rgba(167, 139, 250, 0.5);
 }
 
 .hero-desc {
   font-size: 19px;
-  color: rgba(255, 255, 255, 0.70);
+  color: #fff;
   max-width: 520px;
   line-height: 1.55;
   margin: 0 auto 36px;
   position: relative;
+  z-index: 2;
   will-change: transform;
-  text-shadow: 0 0 8px #fff, 0 0 20px rgba(167, 139, 250, 0.9), 0 0 50px rgba(167, 139, 250, 0.6);
+  text-shadow: 0 0 6px #fff, 0 0 15px #fff, 0 0 30px #a78bfa, 0 0 60px rgba(167, 139, 250, 0.6);
 }
 
 .hero-ctas {
   position: relative;
+  z-index: 2;
   will-change: transform;
 }
 
