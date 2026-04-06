@@ -86,6 +86,15 @@ function template() {
 
     <!-- ── Hero ── -->
     <section class="hero" id="top">
+      <div class="hero-video-bg">
+        <iframe
+          src="https://www.youtube.com/embed/--iN63lgsc4?autoplay=1&mute=1&loop=1&playlist=--iN63lgsc4&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&playsinline=1"
+          allow="autoplay; encrypted-media"
+          allowfullscreen
+          title="Hero background video"
+        ></iframe>
+      </div>
+      <div class="hero-video-overlay"></div>
       <canvas id="neuron-canvas"></canvas>
       <p class="hero-eyebrow">Introducing</p>
       <h1 class="hero-title">NeuraWave</h1>

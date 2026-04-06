@@ -273,6 +273,38 @@ h2.section-heading.reveal { opacity: 1; }
   padding: 80px 24px 120px;
 }
 
+/* ── Hero video background ──────────────────────────── */
+.hero-video-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-video-bg iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  /* Scale to cover: iframe is 16:9, so at min 100vw wide it needs height = 56.25vw.
+     If viewport is taller than that, we need width = 177.78vh. */
+  width: max(100%, 177.78vh);
+  height: max(56.25vw, 100%);
+  transform: translate(-50%, -50%);
+  border: none;
+}
+
+.hero-video-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(160deg,
+    rgba(30, 10, 60, 0.70) 0%,
+    rgba(20, 10, 50, 0.60) 50%,
+    rgba(10, 10, 40, 0.55) 100%);
+  pointer-events: none;
+}
+
 /* Multi-directional aurora glow for light bg */
 .hero::before {
   content: '';
@@ -298,7 +330,7 @@ h2.section-heading.reveal { opacity: 1; }
   font-size: 14px;
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: rgba(29, 29, 31, 0.40);
+  color: rgba(255, 255, 255, 0.70);
   margin-bottom: 16px;
   position: relative;
 }
@@ -309,7 +341,7 @@ h2.section-heading.reveal { opacity: 1; }
   letter-spacing: -4px;
   line-height: 0.95;
   margin-bottom: 20px;
-  background: linear-gradient(140deg, #1d1d1f 12%, #7c3aed 52%, #4f46e5 88%);
+  background: linear-gradient(140deg, #ffffff 12%, #a78bfa 52%, #818cf8 88%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -319,7 +351,7 @@ h2.section-heading.reveal { opacity: 1; }
 .hero-tagline {
   font-size: clamp(24px, 3.5vw, 32px);
   font-weight: 300;
-  color: rgba(29, 29, 31, 0.60);
+  color: rgba(255, 255, 255, 0.85);
   letter-spacing: -0.5px;
   margin-bottom: 16px;
   position: relative;
@@ -328,7 +360,7 @@ h2.section-heading.reveal { opacity: 1; }
 
 .hero-desc {
   font-size: 19px;
-  color: rgba(29, 29, 31, 0.48);
+  color: rgba(255, 255, 255, 0.70);
   max-width: 520px;
   line-height: 1.55;
   margin: 0 auto 36px;
