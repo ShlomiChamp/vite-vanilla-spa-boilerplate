@@ -16,14 +16,14 @@ function eegPath(yCenter, totalWidth, amplitude, freq, phase = 0) {
   return d
 }
 
-// ── Build hero wave SVG — darker colors for light background ─────────────────
+// ── Build hero wave SVG ──────────────────────────────────────────────────────
 function heroWaveSVG() {
   const W = 960
   const channels = [
-    { y: 50,  amp: 18, freq: 0.09,  phase: 0.0, color: '#6d28d9', opacity: 0.45, sw: 1.5 },
-    { y: 90,  amp: 14, freq: 0.13,  phase: 1.8, color: '#7c3aed', opacity: 0.30, sw: 1.0 },
-    { y: 130, amp: 22, freq: 0.07,  phase: 3.2, color: '#4f46e5', opacity: 0.22, sw: 1.0 },
-    { y: 160, amp: 12, freq: 0.17,  phase: 0.9, color: '#6d28d9', opacity: 0.18, sw: 0.8 },
+    { y: 50,  amp: 18, freq: 0.09,  phase: 0.0, color: '#8B5CF6', opacity: 0.55, sw: 1.5 },
+    { y: 90,  amp: 14, freq: 0.13,  phase: 1.8, color: '#A78BFA', opacity: 0.38, sw: 1.0 },
+    { y: 130, amp: 22, freq: 0.07,  phase: 3.2, color: '#22D3EE', opacity: 0.28, sw: 1.0 },
+    { y: 160, amp: 12, freq: 0.17,  phase: 0.9, color: '#8B5CF6', opacity: 0.20, sw: 0.8 },
   ]
 
   const paths = channels.map(ch => {
@@ -35,7 +35,7 @@ function heroWaveSVG() {
   }).join('')
 
   return `<svg class="hero-wave-svg" viewBox="0 0 ${W * 2} 180" preserveAspectRatio="none"
-           xmlns="http://www.w3.org/2000/svg">${paths}</svg>`
+           xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${paths}</svg>`
 }
 
 // ── Build spotlight EEG display ──────────────────────────────────────────────
@@ -49,38 +49,36 @@ function spotlightEEG() {
     { y: 152, amp: 10, freq: 0.16, phase: 3.5 },
   ]
   const labels = ['Fp1', 'C3', 'Pz', 'O1', 'T4']
-  const colors = ['#818cf8', '#a78bfa', '#c084fc', '#818cf8', '#a78bfa']
+  const colors = ['#A78BFA', '#8B5CF6', '#C4B5FD', '#22D3EE', '#A78BFA']
 
   const rows = channels.map((ch, i) => `
     <text class="eeg-channel-label" x="0" y="${ch.y + 4}">${labels[i]}</text>
     <path d="${eegPath(ch.y, W - 36, ch.amp, ch.freq, ch.phase)}"
-          stroke="${colors[i]}" stroke-width="1.4" fill="none" opacity="0.75"
+          stroke="${colors[i]}" stroke-width="1.5" fill="none"
           transform="translate(36,0)"
-          style="opacity:0;animation:eeg-fade 0.7s ease ${0.1 + i * 0.12}s forwards"/>
+          style="opacity:0;animation:eeg-fade 0.8s ease ${0.1 + i * 0.15}s forwards"/>
   `).join('')
 
   return `
-    <style>
-      @keyframes eeg-fade { to { opacity: 0.75 } }
-    </style>
     <svg viewBox="0 0 ${W} 176" xmlns="http://www.w3.org/2000/svg"
-         style="width:100%;overflow:visible">${rows}</svg>`
+         style="width:100%;overflow:visible" role="img"
+         aria-label="Live EEG brain activity display showing 5 channels: Fp1, C3, Pz, O1, T4">${rows}</svg>`
 }
 
 // ── Page template ────────────────────────────────────────────────────────────
 function template() {
   return /* html */`
     <!-- ── Navigation ── -->
-    <nav id="nav">
+    <nav id="nav" aria-label="Primary navigation">
       <div class="nav-inner">
-        <a href="#top" class="nav-logo">NeuraWave</a>
-        <ul class="nav-links">
+        <a href="#top" class="nav-logo" aria-label="NeuraWave — home">NeuraWave</a>
+        <ul class="nav-links" role="list">
           <li><a href="#features">Features</a></li>
           <li><a href="#science">Science</a></li>
           <li><a href="#technology">Technology</a></li>
           <li><a href="#use-cases">Use Cases</a></li>
         </ul>
-        <a href="#order" class="nav-cta">Order</a>
+        <a href="#order" class="nav-cta" aria-label="Order NeuraWave">Order</a>
       </div>
     </nav>
 
@@ -95,7 +93,7 @@ function template() {
         ></iframe>
       </div>
       <div class="hero-video-overlay"></div>
-      <canvas id="neuron-canvas"></canvas>
+      <canvas id="neuron-canvas" aria-hidden="true"></canvas>
       <p class="hero-eyebrow">Introducing</p>
       <h1 class="hero-title">NeuraWave</h1>
       <p class="hero-tagline">Your mind, decoded.</p>
@@ -104,8 +102,8 @@ function template() {
         interprets, and responds to your neural activity — in real time.
       </p>
       <div class="hero-ctas ctas">
-        <a href="#technology" class="btn btn-purple">Learn more</a>
-        <a href="#order"      class="btn btn-outline-dark">Order now</a>
+        <a href="#technology" class="btn btn-purple" aria-label="Learn more about NeuraWave technology">Learn more</a>
+        <a href="#order"      class="btn btn-outline-dark" aria-label="Order NeuraWave device">Order now</a>
       </div>
       <div class="hero-wave">${heroWaveSVG()}</div>
     </section>
@@ -169,9 +167,10 @@ function template() {
           <p class="label label-blue reveal">What it does</p>
           <h2 class="section-heading reveal">Engineered for<br>the human mind.</h2>
         </div>
-        <div class="features-grid">
-          <div class="feat-card reveal">
-            <div class="feat-icon">🧠</div>
+        <!-- Bento grid: [wide 2col][1col] / [1col][wide 2col] -->
+        <div class="features-bento">
+          <div class="feat-card feat-card--wide reveal" role="group" aria-label="Feature: Real-Time Neural Decoding">
+            <div class="feat-icon" aria-hidden="true">🧠</div>
             <h3 class="feat-title">Real-Time Neural Decoding</h3>
             <p class="feat-desc">
               NeuraWave processes all 256 channels simultaneously at 2 kHz,
@@ -179,8 +178,8 @@ function template() {
               latency — faster than conscious thought.
             </p>
           </div>
-          <div class="feat-card reveal">
-            <div class="feat-icon">✨</div>
+          <div class="feat-card reveal" role="group" aria-label="Feature: LLM Brain Interpreter">
+            <div class="feat-icon" aria-hidden="true">✨</div>
             <h3 class="feat-title">LLM Brain Interpreter</h3>
             <p class="feat-desc">
               A purpose-built large language model converts raw neural patterns
@@ -188,8 +187,8 @@ function template() {
               context-aware responses you can actually use.
             </p>
           </div>
-          <div class="feat-card reveal">
-            <div class="feat-icon">🔒</div>
+          <div class="feat-card reveal" role="group" aria-label="Feature: On-Device Privacy">
+            <div class="feat-icon" aria-hidden="true">🔒</div>
             <h3 class="feat-title">On-Device Privacy</h3>
             <p class="feat-desc">
               All neural inference runs on-device. Your brain data never
@@ -197,8 +196,8 @@ function template() {
               required for core functionality. Your mind is your own.
             </p>
           </div>
-          <div class="feat-card reveal">
-            <div class="feat-icon">⚡</div>
+          <div class="feat-card feat-card--wide reveal" role="group" aria-label="Feature: Adaptive Personalization">
+            <div class="feat-icon" aria-hidden="true">⚡</div>
             <h3 class="feat-title">Adaptive Personalization</h3>
             <p class="feat-desc">
               NeuraWave continuously fine-tunes its model to your unique
@@ -281,8 +280,8 @@ function template() {
           <h2 class="section-heading reveal">Your brain.<br>Endless possibilities.</h2>
         </div>
         <div class="use-cases-grid">
-          <div class="uc-card reveal">
-            <span class="uc-emoji">🎯</span>
+          <div class="uc-card reveal" role="group" aria-label="Use case: Peak Focus">
+            <span class="uc-emoji" aria-hidden="true">🎯</span>
             <h3 class="uc-title">Peak Focus</h3>
             <p class="uc-desc">
               NeuraWave detects concentration dips and activates
@@ -290,8 +289,8 @@ function template() {
               work states before you even notice you've drifted.
             </p>
           </div>
-          <div class="uc-card reveal">
-            <span class="uc-emoji">🧘</span>
+          <div class="uc-card reveal" role="group" aria-label="Use case: Mindful Wellbeing">
+            <span class="uc-emoji" aria-hidden="true">🧘</span>
             <h3 class="uc-title">Mindful Wellbeing</h3>
             <p class="uc-desc">
               Real-time stress and anxiety detection with guided
@@ -299,8 +298,8 @@ function template() {
               moment by moment.
             </p>
           </div>
-          <div class="uc-card reveal">
-            <span class="uc-emoji">🏥</span>
+          <div class="uc-card reveal" role="group" aria-label="Use case: Health Monitoring">
+            <span class="uc-emoji" aria-hidden="true">🏥</span>
             <h3 class="uc-title">Health Monitoring</h3>
             <p class="uc-desc">
               Track biomarkers linked to fatigue and cognitive
@@ -308,8 +307,8 @@ function template() {
               provider can actually use.
             </p>
           </div>
-          <div class="uc-card reveal">
-            <span class="uc-emoji">🎨</span>
+          <div class="uc-card reveal" role="group" aria-label="Use case: Creative Flow">
+            <span class="uc-emoji" aria-hidden="true">🎨</span>
             <h3 class="uc-title">Creative Flow</h3>
             <p class="uc-desc">
               Enter flow states on demand. NeuraWave recognizes the
@@ -336,18 +335,58 @@ function template() {
       </div>
     </section>
 
-    <!-- ── Footer ── -->
-    <footer>
+    <!-- ── Fat Footer ── -->
+    <footer role="contentinfo">
       <div class="footer-inner">
-        <p class="footer-copy">Copyright © 2026 NeuraWave, Inc. All rights reserved.</p>
-        <nav class="footer-links">
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Use</a>
-          <a href="#">Legal</a>
-          <a href="#">Accessibility</a>
-          <a href="#">Contact</a>
-          <a href="#">Site Map</a>
+        <div class="footer-brand">
+          <a href="#top" class="footer-logo" aria-label="NeuraWave — back to top">NeuraWave</a>
+          <p class="footer-tagline">The world's first AI-powered brain interface. Your mind, decoded.</p>
+        </div>
+        <nav class="footer-col" aria-label="Product navigation">
+          <h4 class="footer-col-title">Product</h4>
+          <ul role="list">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#science">Science</a></li>
+            <li><a href="#technology">Technology</a></li>
+            <li><a href="#use-cases">Use Cases</a></li>
+            <li><a href="#order">Pricing</a></li>
+          </ul>
         </nav>
+        <nav class="footer-col" aria-label="Company navigation">
+          <h4 class="footer-col-title">Company</h4>
+          <ul role="list">
+            <li><a href="#">About</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Press</a></li>
+            <li><a href="#">Blog</a></li>
+          </ul>
+        </nav>
+        <nav class="footer-col" aria-label="Support navigation">
+          <h4 class="footer-col-title">Support</h4>
+          <ul role="list">
+            <li><a href="#">Help Center</a></li>
+            <li><a href="#">Contact Us</a></li>
+            <li><a href="#">Status</a></li>
+            <li><a href="#">Community</a></li>
+          </ul>
+        </nav>
+        <nav class="footer-col" aria-label="Legal navigation">
+          <h4 class="footer-col-title">Legal</h4>
+          <ul role="list">
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Use</a></li>
+            <li><a href="#">Accessibility</a></li>
+            <li><a href="#">Compliance</a></li>
+            <li><a href="#">Security</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="footer-bottom">
+        <p class="footer-copy">
+          Copyright © 2026 NeuraWave, Inc. All rights reserved.
+          NeuraWave is committed to inclusive design and WCAG 2.1 AA accessibility standards.
+          Certified for clinical use in 42 countries.
+        </p>
       </div>
     </footer>
   `
@@ -418,7 +457,7 @@ function initNeuronCanvas() {
           ctx.beginPath()
           ctx.moveTo(nodes[i].x, nodes[i].y)
           ctx.lineTo(nodes[j].x, nodes[j].y)
-          ctx.strokeStyle = `rgba(109, 40, 217, ${(1 - d / CONN) * 0.11})`
+          ctx.strokeStyle = `rgba(139, 92, 246, ${(1 - d / CONN) * 0.14})`
           ctx.lineWidth = 0.65
           ctx.stroke()
         }
@@ -427,11 +466,11 @@ function initNeuronCanvas() {
 
     // Draw nodes
     nodes.forEach(n => {
-      const alpha = 0.28 + 0.14 * Math.sin(n.phase)
+      const alpha = 0.30 + 0.15 * Math.sin(n.phase)
       const r     = n.r  * (0.88 + 0.12 * Math.sin(n.phase * 1.6))
       ctx.beginPath()
       ctx.arc(n.x, n.y, r, 0, Math.PI * 2)
-      ctx.fillStyle = `rgba(109, 40, 217, ${alpha})`
+      ctx.fillStyle = `rgba(139, 92, 246, ${alpha})`
       ctx.fill()
     })
 
@@ -446,19 +485,19 @@ function initNeuronCanvas() {
       const y  = fn.y + (tn.y - fn.y) * p.t
       const a  = Math.sin(p.t * Math.PI)
 
-      // Soft glow ring
-      const grd = ctx.createRadialGradient(x, y, 0, x, y, 6)
-      grd.addColorStop(0, `rgba(167, 139, 250, ${a * 0.7})`)
+      // Soft violet glow ring
+      const grd = ctx.createRadialGradient(x, y, 0, x, y, 7)
+      grd.addColorStop(0, `rgba(167, 139, 250, ${a * 0.75})`)
       grd.addColorStop(1, `rgba(167, 139, 250, 0)`)
       ctx.beginPath()
-      ctx.arc(x, y, 6, 0, Math.PI * 2)
+      ctx.arc(x, y, 7, 0, Math.PI * 2)
       ctx.fillStyle = grd
       ctx.fill()
 
-      // Bright core
+      // Electric cyan bright core
       ctx.beginPath()
       ctx.arc(x, y, 2, 0, Math.PI * 2)
-      ctx.fillStyle = `rgba(192, 132, 252, ${a * 0.9})`
+      ctx.fillStyle = `rgba(34, 211, 238, ${a * 0.9})`
       ctx.fill()
     }
 
@@ -559,11 +598,39 @@ function initReveal() {
   document.querySelectorAll('.reveal').forEach(el => io.observe(el))
 }
 
+// ── Hero mouse parallax — neuron canvas drifts with cursor ───────────────────
+function initHeroMouseParallax() {
+  const hero   = document.querySelector('.hero')
+  const canvas = document.getElementById('neuron-canvas')
+  if (!hero || !canvas) return
+
+  let ticking = false
+
+  hero.addEventListener('mousemove', e => {
+    if (ticking) return
+    ticking = true
+    requestAnimationFrame(() => {
+      const rect = hero.getBoundingClientRect()
+      const mx = (e.clientX - rect.left) / rect.width  - 0.5
+      const my = (e.clientY - rect.top)  / rect.height - 0.5
+      canvas.style.transform  = `translate(${mx * -18}px, ${my * -12}px)`
+      canvas.style.transition = 'transform 0.15s ease'
+      ticking = false
+    })
+  }, { passive: true })
+
+  hero.addEventListener('mouseleave', () => {
+    canvas.style.transform  = 'translate(0,0)'
+    canvas.style.transition = 'transform 1.2s ease'
+  }, { passive: true })
+}
+
 // ── Boot ─────────────────────────────────────────────────────────────────────
 document.getElementById('app').innerHTML = template()
 initNav()
 initReveal()
 initNeuronCanvas()
 initParallax()
+initHeroMouseParallax()
 // Trigger hero entrance animations after a short paint delay
 setTimeout(() => document.body.classList.add('loaded'), 60)
